@@ -1,0 +1,29 @@
+#!name=JD App UI & Ad Cleanup
+#!desc=Removes ads, floating widgets, telemetry, and cleans up homepage/profile/order pages. Updated 2026-05-19 with live capture analysis.
+#!author=Antigravity
+#!homepage=https://github.com/invisberserker/jd_ui_cleanup
+#!date=2026-05-19
+
+[Rule]
+# Block JD internal diagnostics endpoint
+URL-REGEX,^http:\/\/\w{32}\.jddebug\.com\/diagnose\?,REJECT
+
+[Rewrite]
+# --- Telemetry & Monitoring (safe to block entirely) ---
+# Blocks web monitoring, network monitoring, ad exposure tracking, page view uploads, and logging config
+^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(pingou_webmonitor_biz|logConfig|netMonitor|deliveryReportExposure|uploadPageView) reject-dict
+
+# --- Promotional Popups & Recommendations (safe to block entirely) ---
+# Blocks popup windows, guide tips, coupon pushes, shop recommendations, lottery rewards
+^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(queryPagePopWindow|babelGetGuideTips|bff_rights_center_recommend|bff_rightsCenter_recommendCoupon|recommendShopV15100|dj_lottery_reward_list_new) reject-dict
+
+# --- Legacy community rules (still valid for search bar and uniform recommend) ---
+^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(searchBoxWord|stationPullService|uniformRecommend[06]) reject-dict
+
+[Script]
+# Unified script: handles basicConfig, secondFloor, weGameIcon, bff_marketing_resource,
+# plus legacy endpoints (welcomeHome, personinfoBusiness, myOrderInfo, etc.) as fallback.
+http-response ^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(basicConfig|secondFloor|weGameIcon|bff_marketing_resource|deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome) script-path=https://raw.githubusercontent.com/invisberserker/jd_ui_cleanup/master/jd_ui_cleanup.js, requires-body=true, timeout=10, tag=JD_UI_Cleanup
+
+[MITM]
+hostname = api.m.jd.com
