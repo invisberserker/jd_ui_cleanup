@@ -1,5 +1,5 @@
 #!name=JD App UI & Ad Cleanup
-#!desc=Removes ads, floating widgets, telemetry, and cleans up homepage/profile/order pages. Updated 2026-05-19 with live capture analysis.
+#!desc=Removes ads, floating widgets (直播讲解/问京言/点我领奖), telemetry, and disables live streaming tabs. Updated 2026-05-19 v3 with capture_58 analysis.
 #!author=Antigravity
 #!homepage=https://github.com/invisberserker/jd_ui_cleanup
 #!date=2026-05-19
@@ -20,10 +20,21 @@ URL-REGEX,^http:\/\/\w{32}\.jddebug\.com\/diagnose\?,REJECT
 # --- Legacy community rules (still valid for search bar and uniform recommend) ---
 ^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(searchBoxWord|stationPullService|uniformRecommend[06]) reject-dict
 
+# --- [NEW v3] 问京言 (JingYan AI chatbot) entry point rejection ---
+# aishopping.jd.com serves the 问京言 AI chatbot webview entry on the product page.
+# Blocking it prevents the floating "问京言" button from loading its webview content.
+# The native button UI may still appear but will fail to open gracefully.
+^https:\/\/aishopping\.jd\.com\/ reject-200
+
+# --- [NEW v3] JD Telemetry infrastructure ---
+# Block performance/behavioral telemetry collection hosts
+^https:\/\/(mars|cactus|uranus|mllog|sdkfp|waapdg|wl|sgm-w|sgm-m|sgm-static|anti-sdk-report|device-security-url)\.jd\.com\/ reject-200
+
 [Script]
 # Unified script: handles basicConfig, secondFloor, weGameIcon, bff_marketing_resource,
-# plus legacy endpoints (welcomeHome, personinfoBusiness, myOrderInfo, etc.) as fallback.
-http-response ^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(basicConfig|secondFloor|weGameIcon|bff_marketing_resource|deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome) script-path=https://raw.githubusercontent.com/invisberserker/jd_ui_cleanup/master/jd_ui_cleanup.js, requires-body=true, timeout=10, tag=JD_UI_Cleanup
+# superRedBagHome (点我领奖), getAllPkMsg (直播讲解 data), getTopAuthorList (live KOL card),
+# plus legacy endpoints as fallback.
+http-response ^https:\/\/api\.m\.jd\.com\/(client\.action|api)\?functionId=(basicConfig|secondFloor|weGameIcon|bff_marketing_resource|superRedBagHome|getAllPkMsg|getTopAuthorList|deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome) script-path=https://raw.githubusercontent.com/invisberserker/jd_ui_cleanup/master/jd_ui_cleanup.js, requires-body=true, timeout=10, tag=JD_UI_Cleanup
 
 [MITM]
-hostname = api.m.jd.com
+hostname = api.m.jd.com, aishopping.jd.com, mars.jd.com, cactus.jd.com, uranus.jd.com, mllog.jd.com, sdkfp.jd.com, waapdg.jd.com, wl.jd.com, sgm-w.jd.com, sgm-m.jd.com, sgm-static.jd.com, anti-sdk-report.m.jd.com, device-security-url.jd.com
