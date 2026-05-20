@@ -285,67 +285,46 @@ else if (url.includes("functionId=bff_marketing_resource")) {
 // ==========================================
 // 5. REWARD GAME ICON – "点我领奖" floating widget on My JD page
 // [NEW v3] Endpoint: superRedBagHome
-// This endpoint controls the floating game/lottery icon that appears in
-// the bottom-right of the "我的" (My JD) profile page. The icon opens
-// an in-app game ("东东农场", 签到领奖, lottery, etc.)
-// Setting showQuickLotteryIconFlag=false hides the floating icon.
-// Setting dailyLotteryVo=null prevents the daily lottery widget from rendering.
+// Completely disable this widget by returning a clean failure response.
 // ==========================================
 else if (url.includes("functionId=superRedBagHome")) {
-  if (body?.data) {
-    // Hide quick lottery icon
-    if (body.data.showQuickLotteryIconFlag !== undefined) {
-      body.data.showQuickLotteryIconFlag = false;
-    }
-    if (body.data.showQuickLotteryStartAnimation !== undefined) {
-      body.data.showQuickLotteryStartAnimation = false;
-    }
-    // Null out the daily lottery widget data
-    if (body.data.dailyLotteryVo !== undefined) {
-      body.data.dailyLotteryVo = null;
-    }
-    // Null out any prize draw data
-    if (body.data.prizeDrawVo !== undefined) {
-      body.data.prizeDrawVo = null;
-    }
-  }
+  body = { code: "-1", message: "disabled", data: null };
 }
 
 // ==========================================
 // 6. PRODUCT PAGE LIVE LEADERBOARD – "直播讲解" source data
 // [NEW v3] Endpoint: getAllPkMsg (wh5 client)
-// This endpoint is called from within the product detail page (wh5 context)
-// and returns the live streaming PK/leaderboard data. The "直播讲解"
-// floating card on the product page is populated using this data.
-// Setting activityName to null and clearing host/graph data disables the card.
+// Completely disable this widget by returning a clean failure response.
 // ==========================================
 else if (url.includes("functionId=getAllPkMsg")) {
-  if (body?.data) {
-    // Null out the live activity data to prevent the floating live card
-    body.data.activityHostGraph = null;
-    body.data.activityName = null;
-    body.data.tracks = [];
-    body.data.firePowerType = -1;
-  }
+  body = { code: "-1", message: "disabled", data: null };
 }
 
 // ==========================================
 // 7. PRODUCT PAGE LIVE KOL FLOAT – "直播讲解" author card source
 // [NEW v3] Endpoint: getTopAuthorList (wh5 client)
-// Returns the list of live streaming authors/KOLs associated with a SKU.
-// The "直播讲解" floating widget on product pages reads this list to show
-// a live host card when a relevant author is streaming.
-// Returning an empty list prevents the card from appearing.
+// Completely disable this widget by returning a clean failure response.
 // ==========================================
 else if (url.includes("functionId=getTopAuthorList")) {
-  // Return empty author list to suppress the live author float card
-  if (Array.isArray(body?.data)) {
-    body.data = [];
-  }
-  if (body?.data && !Array.isArray(body.data)) {
-    if (body.data.authorList) body.data.authorList = [];
-    if (body.data.list) body.data.list = [];
-  }
+  body = { code: "-1", message: "disabled", data: null };
+}
+
+// ==========================================
+// 7A. INTERACTIVE GAME HEADER RESOURCE
+// [NEW v3] Endpoint: getStaticResource
+// Disable the "互动游戏" link on page headers.
+// ==========================================
+else if (url.includes("functionId=getStaticResource")) {
+  body = { success: false, code: -1, errMsg: "disabled", data: null };
+}
+
+// ==========================================
+// 7B. FLOATING REDDOT & RED ENVELOPE BUBBLE ITEMS
+// [NEW v3] Endpoint: redotItems
+// Disable the floating red envelope / fission widgets.
+// ==========================================
+else if (url.includes("functionId=redotItems")) {
+  body = { code: -1, message: "disabled", data: null };
 }
 
 // ==========================================
@@ -486,37 +465,28 @@ else if (url.includes("functionId=start")) {
 // ==========================================
 // 14. PRODUCT TITLE AI CHATBOT LINKS – 问京言 inline links
 // [NEW v3] Endpoint: sku_interp_title
-// Clear the data array to remove AI chatbot text links in the title
+// Completely disable this widget by returning a clean failure response.
 // ==========================================
 else if (url.includes("functionId=sku_interp_title")) {
-  if (body?.data) {
-    body.data = [];
-  }
+  body = { code: "-1", message: "disabled", data: null };
 }
 
 // ==========================================
 // 15. GAME DASHBOARD / USER FISSION INFO
 // [NEW v3] Endpoints: weGameHome, weGamePushQuery
-// Controls game center fission tasks, rewards, and user mini-game pushes.
-// Returning empty/disabled data suppresses the mini-game widgets.
+// Completely disable these widgets by returning a clean failure response.
 // ==========================================
 else if (url.includes("functionId=weGameHome") || url.includes("functionId=weGamePushQuery")) {
-  if (body?.data) {
-    body.data = {};
-  }
+  body = { code: "-1", message: "disabled", data: null };
 }
 
 // ==========================================
 // 16. PET GAME WIDGET INFO
 // [NEW v3] Endpoint: petHome (Dongdong Pet)
-// Controls rendering of the Dongdong Pet mini-game widget.
-// Returning code: 0 and bizCode: -1 disables the pet widget.
+// Completely disable this widget by returning a clean failure response.
 // ==========================================
 else if (url.includes("functionId=petHome")) {
-  if (body) {
-    body.code = 0;
-    body.data = { bizCode: -1, bizMsg: "Disabled" };
-  }
+  body = { code: "-1", message: "disabled", data: null };
 }
 
 $done({ body: JSON.stringify(body) });

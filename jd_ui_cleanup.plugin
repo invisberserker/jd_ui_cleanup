@@ -14,6 +14,9 @@ DOMAIN,aishopping.jd.com,REJECT
 # Block live lottery & live PK domains
 DOMAIN,livelottery.jd.com,REJECT
 
+# Block live player video streaming hosts
+DOMAIN-SUFFIX,300hu.com,REJECT
+
 # Block telemetry/analytics subdomains (prevents network calls without MITM decryption)
 DOMAIN,mars.jd.com,REJECT
 DOMAIN,cactus.jd.com,REJECT
@@ -46,7 +49,7 @@ DOMAIN,device-security-url.jd.com,REJECT
 # sku_interp_title (AI chatbot titles), weGameHome (game center), weGamePushQuery (game push status),
 # petHome (Dongdong Pet), plus legacy endpoints as fallback.
 # script-path is set to the local file for immediate development testing.
-http-response ^https:\/\/api\.m\.jd\.com\/.*[?&]functionId=(basicConfig|secondFloor|weGameIcon|bff_marketing_resource|superRedBagHome|getAllPkMsg|getTopAuthorList|sku_interp_title|weGameHome|weGamePushQuery|petHome|deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome)(\b|&) script-path=https://raw.githubusercontent.com/invisberserker/jd_ui_cleanup/master/jd_ui_cleanup.js,requires-body=true,timeout=10,tag=JD_UI_Cleanup
+http-response ^https:\/\/api\.m\.jd\.com\/.*[?&]functionId=(basicConfig|secondFloor|weGameIcon|bff_marketing_resource|superRedBagHome|getAllPkMsg|getTopAuthorList|sku_interp_title|weGameHome|weGamePushQuery|petHome|getStaticResource|redotItems|deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome)(\b|&) script-path=https://raw.githubusercontent.com/invisberserker/jd_ui_cleanup/master/jd_ui_cleanup.js,requires-body=true,timeout=10,tag=JD_UI_Cleanup
 
 [MITM]
 # Optimized list: only api.m.jd.com requires MITM decryption to rewrite responses
