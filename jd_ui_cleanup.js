@@ -225,6 +225,23 @@ if (url.includes("functionId=basicConfig")) {
     if (body.data.JDProductDetail?.pdcMiniVideoKey) {
       body.data.JDProductDetail.pdcMiniVideoKey.pdcMiniVideoKey = "0";
     }
+
+    // [BLOCK 1K] AI Chatbot (问京言) Global Config Suppression
+    if (body.data.AIShopping) delete body.data.AIShopping;
+    if (body.data.JDMessage && body.data.JDMessage.AIChat) {
+      body.data.JDMessage.AIChat.enableShowAIChatFavorite = "0";
+      body.data.JDMessage.AIChat.enableFavoriteGuide = "0";
+    }
+    if (body.data.JDJMA?.function) {
+      body.data.JDJMA.function.endAIOpen = 0;
+    }
+    if (body.data.JDRiskHandle) {
+      body.data.JDRiskHandle.endAIState = null;
+      body.data.JDRiskHandle.timeIntervalEndAI = null;
+      if (body.data.JDRiskHandle.fatigueConfig) {
+        body.data.JDRiskHandle.fatigueConfig.endAI = null;
+      }
+    }
   }
 }
 
@@ -464,6 +481,42 @@ else if (url.includes("functionId=welcomeHome")) {
 else if (url.includes("functionId=start")) {
   if (body?.images?.length > 0) body.images = [];
   if (body?.showTimesDaily) body.showTimesDaily = 0;
+}
+
+// ==========================================
+// 14. PRODUCT TITLE AI CHATBOT LINKS – 问京言 inline links
+// [NEW v3] Endpoint: sku_interp_title
+// Clear the data array to remove AI chatbot text links in the title
+// ==========================================
+else if (url.includes("functionId=sku_interp_title")) {
+  if (body?.data) {
+    body.data = [];
+  }
+}
+
+// ==========================================
+// 15. GAME DASHBOARD / USER FISSION INFO
+// [NEW v3] Endpoints: weGameHome, weGamePushQuery
+// Controls game center fission tasks, rewards, and user mini-game pushes.
+// Returning empty/disabled data suppresses the mini-game widgets.
+// ==========================================
+else if (url.includes("functionId=weGameHome") || url.includes("functionId=weGamePushQuery")) {
+  if (body?.data) {
+    body.data = {};
+  }
+}
+
+// ==========================================
+// 16. PET GAME WIDGET INFO
+// [NEW v3] Endpoint: petHome (Dongdong Pet)
+// Controls rendering of the Dongdong Pet mini-game widget.
+// Returning code: 0 and bizCode: -1 disables the pet widget.
+// ==========================================
+else if (url.includes("functionId=petHome")) {
+  if (body) {
+    body.code = 0;
+    body.data = { bizCode: -1, bizMsg: "Disabled" };
+  }
 }
 
 $done({ body: JSON.stringify(body) });

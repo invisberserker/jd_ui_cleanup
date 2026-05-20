@@ -8,33 +8,46 @@
 # Block JD internal diagnostics endpoint
 URL-REGEX,^http:\/\/\w{32}\.jddebug\.com\/diagnose\?,REJECT
 
+# Block AI chatbot domain (prevents webview load without MITM decryption)
+DOMAIN,aishopping.jd.com,REJECT
+
+# Block live lottery & live PK domains
+DOMAIN,livelottery.jd.com,REJECT
+
+# Block telemetry/analytics subdomains (prevents network calls without MITM decryption)
+DOMAIN,mars.jd.com,REJECT
+DOMAIN,cactus.jd.com,REJECT
+DOMAIN,uranus.jd.com,REJECT
+DOMAIN,mllog.jd.com,REJECT
+DOMAIN,sdkfp.jd.com,REJECT
+DOMAIN,waapdg.jd.com,REJECT
+DOMAIN,wl.jd.com,REJECT
+DOMAIN,sgm-w.jd.com,REJECT
+DOMAIN,sgm-m.jd.com,REJECT
+DOMAIN,sgm-static.jd.com,REJECT
+DOMAIN,anti-sdk-report.m.jd.com,REJECT
+DOMAIN,device-security-url.jd.com,REJECT
+
 [Rewrite]
 # --- Telemetry & Monitoring (safe to block entirely) ---
 # Blocks web monitoring, network monitoring, ad exposure tracking, page view uploads, and logging config
-^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(pingou_webmonitor_biz|logConfig|netMonitor|deliveryReportExposure|uploadPageView) reject-dict
+^https:\/\/api\.m\.jd\.com\/.*[?&]functionId=(pingou_webmonitor_biz|logConfig|netMonitor|deliveryReportExposure|uploadPageView)(\b|&) reject-dict
 
 # --- Promotional Popups & Recommendations (safe to block entirely) ---
 # Blocks popup windows, guide tips, coupon pushes, shop recommendations, lottery rewards
-^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(queryPagePopWindow|babelGetGuideTips|bff_rights_center_recommend|bff_rightsCenter_recommendCoupon|recommendShopV15100|dj_lottery_reward_list_new) reject-dict
+^https:\/\/api\.m\.jd\.com\/.*[?&]functionId=(queryPagePopWindow|babelGetGuideTips|bff_rights_center_recommend|bff_rightsCenter_recommendCoupon|recommendShopV15100|dj_lottery_reward_list_new)(\b|&) reject-dict
 
 # --- Legacy community rules (still valid for search bar and uniform recommend) ---
-^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(searchBoxWord|stationPullService|uniformRecommend[06]) reject-dict
-
-# --- [NEW v3] 问京言 (JingYan AI chatbot) entry point rejection ---
-# aishopping.jd.com serves the 问京言 AI chatbot webview entry on the product page.
-# Blocking it prevents the floating "问京言" button from loading its webview content.
-# The native button UI may still appear but will fail to open gracefully.
-^https:\/\/aishopping\.jd\.com\/ reject-200
-
-# --- [NEW v3] JD Telemetry infrastructure ---
-# Block performance/behavioral telemetry collection hosts
-^https:\/\/(mars|cactus|uranus|mllog|sdkfp|waapdg|wl|sgm-w|sgm-m|sgm-static|anti-sdk-report|device-security-url)\.jd\.com\/ reject-200
+^https:\/\/api\.m\.jd\.com\/.*[?&]functionId=(searchBoxWord|stationPullService|uniformRecommend[06])(\b|&) reject-dict
 
 [Script]
 # Unified script: handles basicConfig, secondFloor, weGameIcon, bff_marketing_resource,
 # superRedBagHome (点我领奖), getAllPkMsg (直播讲解 data), getTopAuthorList (live KOL card),
-# plus legacy endpoints as fallback.
-http-response ^https:\/\/api\.m\.jd\.com\/(client\.action|api)\?functionId=(basicConfig|secondFloor|weGameIcon|bff_marketing_resource|superRedBagHome|getAllPkMsg|getTopAuthorList|deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome) script-path=https://raw.githubusercontent.com/invisberserker/jd_ui_cleanup/master/jd_ui_cleanup.js, requires-body=true, timeout=10, tag=JD_UI_Cleanup
+# sku_interp_title (AI chatbot titles), weGameHome (game center), weGamePushQuery (game push status),
+# petHome (Dongdong Pet), plus legacy endpoints as fallback.
+# script-path is set to the local file for immediate development testing.
+http-response ^https:\/\/api\.m\.jd\.com\/.*[?&]functionId=(basicConfig|secondFloor|weGameIcon|bff_marketing_resource|superRedBagHome|getAllPkMsg|getTopAuthorList|sku_interp_title|weGameHome|weGamePushQuery|petHome|deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome)(\b|&) script-path=https://raw.githubusercontent.com/invisberserker/jd_ui_cleanup/master/jd_ui_cleanup.js,requires-body=true,timeout=10,tag=JD_UI_Cleanup
 
 [MITM]
-hostname = api.m.jd.com, aishopping.jd.com, mars.jd.com, cactus.jd.com, uranus.jd.com, mllog.jd.com, sdkfp.jd.com, waapdg.jd.com, wl.jd.com, sgm-w.jd.com, sgm-m.jd.com, sgm-static.jd.com, anti-sdk-report.m.jd.com, device-security-url.jd.com
+# Optimized list: only api.m.jd.com requires MITM decryption to rewrite responses
+hostname = api.m.jd.com
